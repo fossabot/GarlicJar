@@ -30,8 +30,6 @@ build/
 local.properties
 *.iml
 
-#android/app/src/main/assets/index.android*
-
 # node.js
 #
 node_modules/
@@ -53,6 +51,3 @@ buck-out/
 */fastlane/report.xml
 */fastlane/Preview.html
 */fastlane/screenshots
-
-globals.js
-shim.js

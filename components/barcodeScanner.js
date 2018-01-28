@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, Alert, Keyboard } from 'react-native';
 import { NavigationActions } from 'react-navigation';
 import StatelessNavigation from '../utils/navigation';
 import Camera from 'react-native-camera';
-import GlobalConstants from '../globals';
+// import GlobalConstants from '../globals';
 
 export default class BarcodeScanner extends Component {
     constructor(props) {
@@ -13,7 +13,7 @@ export default class BarcodeScanner extends Component {
     }
 
     static navigationOptions = {
-        title: GlobalConstants.getAppName() + " Balance",
+        title: "Garlicoin Balance",
         gesturesEnabled: false
     };
 

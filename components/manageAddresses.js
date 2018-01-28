@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { RefreshControl, Clipboard, Text, View, ScrollView, StyleSheet, Alert, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
+import { RefreshControl, Clipboard, Text, View, ScrollView, StyleSheet, Alert, AsyncStorage, ActivityIndicator, Keyboard, TouchableHighlight } from 'react-native';
 import { FormLabel, FormInput, Button, Card } from 'react-native-elements'
-import GlobalConstants from '../globals';
+// import GlobalConstants from '../globals';
 import renderIf from '../utils/renderIf.js';
 import Swipeout from 'react-native-swipeout';
 import Numbers from '../utils/numbers';
@@ -18,20 +18,20 @@ export default class ManageAddress extends Component {
             apiError: null,
             db: {
                 "balanceInfo": {
-                    "name": "Coinhark API",
-                    "date": "1318464000",
+                    "name": "TradeSatoshi API (via CoinMarketCap)",
+                    "date": "1318464000", // ???
                     "totalBalance": "0.00000000",
                     "addresses": []
                 },
                 "exchange": {
                     "price": 0.00,
-                    "date": "1318464000",
-                    "name": "CoinMarketCap API"
+                    "date": "1318464000", // ???
+                    "name": "TradeSatoshi API (via CoinMarketCap)"
                 }
             }
         }
         this.wallets = [];
-        this.globals = new GlobalConstants();
+        // this.globals = new GlobalConstants();
     }
 
     componentDidMount() {
@@ -40,7 +40,7 @@ export default class ManageAddress extends Component {
     }
 
     static navigationOptions = ({ navigate, navigation }) => ({
-        title: GlobalConstants.getAppName() + " Balance",
+        title: "Garlicoin Balance",
         gesturesEnabled: false,
         headerLeft: <Icon name="home" style={styles.leftButton} onPress={() =>{ navigation.navigate('Home'); }} />,
         headerRight: <Icon name="add" style={styles.rightButton} onPress={() =>{ navigation.navigate('AddAddress')}}/>
@@ -52,29 +52,27 @@ export default class ManageAddress extends Component {
             this.setState({"db": JSON.parse(value)});
             console.log("db state is now: " + value);
             let tmpDb = this.state.db;
-            fetch(this.globals.getMarketApi().url)
+            fetch("https://api.coinmarketcap.com/v1/ticker/garlicoin/") // TODO: replace with global getMarketApi
                 .then(response => response.json())
                 .then(responseJson => {
                     tmpDb.exchange.price = responseJson[0].price_usd;
             })
             Promise.all(this.state.db.balanceInfo.addresses.map(o =>
-                fetch(this.globals.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
+                fetch(`https://explorer.grlc-bakery.fun/ext/getaddress/${o.inputAddress}`).then(resp => resp.json()) // TODO: replace with global getBlockchainApi
             )).then(json => {
-                    if(!Array.isArray(json) || json[0].balance == null) {
-                        console.log(`Unexpected result from ${this.globals.getBlockchainApi().name} API.`);
-                        this.setState({ apiError: `Unexpected result from ${this.globals.getBlockchainApi().name} API.`});
+                    if(!json.keys.length < 1 || json.balance == null) {
+                        console.log(`Unexpected result from Explorer API.`);
+                        this.setState({ apiError: `Unexpected result from Explorer API.`});
                     }
-                json.forEach((element, index) => {
-                    const path = tmpDb.balanceInfo.addresses[index];
-                    path.totalBalance = Numbers.formatBalance(element.balance, 'US');
-                    path.valueInDollars = Numbers.formatPrice(tmpDb.exchange.price * element.balance, 'US');
-                })
+                const path = tmpDb.balanceInfo.addresses[0];
+                path.totalBalance = Numbers.formatBalance(element.balance, 'US');
+                path.valueInDollars = Numbers.formatPrice(tmpDb.exchange.price * element.balance, 'US');
                 this.setState({ db: tmpDb});
                 AsyncStorage.setItem("db", JSON.stringify(tmpDb));
                 console.log("db state is now: " + JSON.stringify(this.state.db));
             }).catch(error => {
-                this.setState({ apiError: `Error connecting to the ${this.globals.getBlockchainApi().name} API.`});
-                console.log(`Error connecting to the ${this.globals.getBlockchainApi().name} API.`);
+                this.setState({ apiError: `Error connecting to the Explorer API.`});
+                console.log(`Error connecting to the Explorer API.`);
             });
             this.setState({loading: false, refreshing: false});
         }).done()
@@ -128,43 +126,32 @@ export default class ManageAddress extends Component {
                         <Text style={styles.noAddress}>It looks like you don't have any addresses yet.</Text>
                         <Text style={styles.noAddress}>You can add one below.</Text>
                     </View>)}
-                    {
-                        this.state.db.balanceInfo.addresses.map((w, i) => {
-                            let swipeoutBtns = [
-                                {
-                                    text: 'Copy',
-                                    backgroundColor: '#2196f3',
-                                    underlayColor: '#2196f3',
-                                    onPress: () => {this.copyToClipboard(w.address)},
-                                },
-                                {
-                                    text: 'Delete',
-                                    backgroundColor: '#FC3D38',
-                                    underlayColor: '#FC3D38',
-                                    onPress: () => {this.deleteAddress(w.address)},
-                                }
-                            ]
-                            return (
-                                    <View key={i} style={styles.address}>
-                                        <Swipeout
-                                            autoClose={true}
-                                            backgroundColor={'#ffffff'}
-                                            right={swipeoutBtns}
-                                            buttonWidth={72}
-                                        >
+                    {this.state.db.balanceInfo.addresses.map((w, i) => {
+                        let swipeoutBtns = [
+                            {
+                                text: 'Delete',
+                                backgroundColor: '#FC3D38',
+                                underlayColor: '#FC3D38',
+                                onPress: () => {this.deleteAddress(w.address)},
+                            }
+                        ]
+                        return (
+                            <View key={i} style={styles.address}>
+                                <TouchableHighlight onPress={() => {this.copyToClipboard(w.address)}}>
+                                    <View>
                                         <Text key={i + '-text'}numberOfLines={1} ellipsizeMode='tail' style={styles.addressName}>{w.name}</Text>
                                             <Text style={styles.addressBalance}>{w.totalBalance}
-                                                <Text style={{fontWeight: '100'}}> {this.globals.getCoinTicker()}</Text>
+                                                <Text style={{fontWeight: '100'}}> GRLC</Text>
                                             </Text>
                                             <Text style={styles.addressBalance}>${w.valueInDollars}
                                                 <Text style={{fontWeight: '100'}}> USD</Text>
                                             </Text>
                                         <Text selectable={true} style={styles.addressText}>{w.address}</Text>
-                                        </Swipeout>
                                     </View>
-                            );
-                        })
-                    }
+                                </TouchableHighlight>
+                            </View>
+                        );
+                    })}
                     <Button
                         containerViewStyle={styles.buttonStyle}
                         onPress={() => navigate('AddAddress', {ltcPrice: this.state.ltcPrice})}

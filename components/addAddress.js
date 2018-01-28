@@ -3,7 +3,7 @@ import { Text, TextInput, View, StyleSheet, Alert, AsyncStorage } from 'react-na
 import { FormLabel, FormInput, FormValidationMessage, Button, Card } from 'react-native-elements'
 import GlobalConstants from '../globals';
 import renderIf from '../utils/renderIf.js';
-import WAValidator from 'wallet-address-validator';
+// import WAValidator from 'wallet-address-validator';  TODO: wait for WAV to implement grlc PR
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 require('../shim');
@@ -51,7 +51,7 @@ export default class AddAddress extends Component {
     }
 
     static navigationOptions = ({navigate, navigation}) => ({
-        title: GlobalConstants.getAppName() + " Balance",
+        title: "Garlicoin Balance",
         gesturesEnabled: false,
         headerLeft: <Icon name="keyboard-backspace" style={styles.leftButton} onPress={() => {
             navigation.navigate('ManageAddresses');
@@ -74,24 +74,8 @@ export default class AddAddress extends Component {
         if (this.state.db.balanceInfo.addresses.find(o => o.address === this.state.address)) {
             this.setState({addressExists: true});
         } else {
-            let validationAddress = this.state.address;
-            if (this.state.address.startsWith('3')) {
-                const decoded = this.bitcoin.address.fromBase58Check(this.state.address);
-                let version = decoded.version;
-                if (version === 5) {
-                    version = 50;
-                }
-                address.inputAddress = bitcoin.address.toBase58Check(decoded['hash'], version);
-            }
-            if (this.state.address.startsWith('M')) {
-                const decoded = this.bitcoin.address.fromBase58Check(this.state.address);
-                let version = decoded.version;
-                if (version === 50) {
-                    version = 5;
-                }
-                validationAddress = bitcoin.address.toBase58Check(decoded['hash'], version);
-            }
-            let valid = WAValidator.validate(validationAddress, this.globals.getCoinName().toLowerCase());
+            // let valid = WAValidator.validate(this.state.address, "garlicoin"); TODO: wait for WAV to implement grlc PR
+            let valid = true;
             if (valid) {
                 let tmpDb = this.state.db;
                 tmpDb.balanceInfo.addresses.push(address);
@@ -119,7 +103,7 @@ export default class AddAddress extends Component {
                     {'This field is required'}
                 </FormValidationMessage>)}
                 {renderIf(this.state.invalidAddress && this.state.address !== '', <FormValidationMessage style>
-                    {'Invalid ' + this.globals.getCoinName() + ' Address'}
+                    {'Invalid Garlicoin Address'}
                 </FormValidationMessage>)}
                 {renderIf(this.state.addressExists && this.state.address !== '', <FormValidationMessage style>
                     {'This address already exists'}

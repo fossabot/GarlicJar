@@ -5,7 +5,6 @@ import AddAddress from './components/addAddress.js';
 import ManageAddresses from './components/manageAddresses.js';
 import WelcomeScreen from './components/welcomeScreen.js';
 import { StackNavigator } from 'react-navigation';
-import { FormLabel, FormInput, Button, Card } from 'react-native-elements'
 
 export const Coinhark = StackNavigator({
     Home: { screen: WelcomeScreen },
@@ -28,6 +27,11 @@ export default class App extends React.Component {
     }
 
     render() {
-        return <Coinhark />;
+        return (
+        <View style={{flex: 1}}>
+            <StatusBar backgroundColor={"#FFC107"} barStyle="light-content"/>
+            <Coinhark />
+        </View>
+        );
     }
 }

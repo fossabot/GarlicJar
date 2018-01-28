@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import {ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard} from 'react-native';
-import {FormLabel, FormInput, Button, Card} from 'react-native-elements';
+import { ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
+import { FormLabel, FormInput, Button, Card } from 'react-native-elements';
+import ActionButton from 'react-native-action-button';
 import GlobalConstants from '../globals';
 import Numbers from '../utils/numbers';
 
@@ -52,12 +53,16 @@ export default class WelcomeScreen extends Component {
                  console.log("db state is now: " + JSON.stringify(this.state.db));
                  if (this.state.db.balanceInfo.addresses.length > 0) {
                      Promise.all(this.state.db.balanceInfo.addresses.map(o =>
-                         fetch(this.globals.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
+                         fetch(`https://explorer.grlc-bakery.fun/ext/getaddress/${o.inputAddress}`).then(resp => resp.json()) // TODO: replace with global getBlockchainApi
                      )).then(json => {
                          if (!Array.isArray(json) || json[0].balance == null) {
-                             console.log(`Unexpected result from ${this.globals.getBlockchainApi().name} API.`);
-                             this.setState({apiError: `Unexpected result from ${this.globals.getBlockchainApi().name} API.`});
+                             console.log(`Unexpected result from Explorer API.`);
+                             this.setState({apiError: `Unexpected result from Explorer API.`});
                          }
+                         // TODO: change this to return a total and an array of addresses and balances.
+                         // totalBalance: ret
+                         // balances: [{address: string, balance: 0.0m}, etc]
+                         // then we can do a foreach on the cards
                          let ret = json.reduce((agg, elem) => {
                              var tmpDb = this.state.db;
                              tmpDb.balanceInfo.addresses.forEach((a) => {
@@ -65,7 +70,7 @@ export default class WelcomeScreen extends Component {
                                      a.totalBalance = elem.balance;
                                  }
                              });
-                             tmpDb.balanceInfo.name = this.globals.getBlockchainApi().name;
+                             tmpDb.balanceInfo.name = "Explorer";
                              tmpDb.balanceInfo.date = new Date().getTime().toString();
                              this.setState({db: tmpDb});
                              AsyncStorage.setItem("db", JSON.stringify(tmpDb));
@@ -74,16 +79,16 @@ export default class WelcomeScreen extends Component {
                          }, 0);
                          this.setState({totalBalance: ret});
                      }).then(bal => {
-                         fetch(this.globals.getMarketApi().url)
+                         fetch("https://api.coinmarketcap.com/v1/ticker/garlicoin/") // TODO: replace with global getMarketApi
                              .then(response => response.json())
                              .then(responseJson => {
                                  if (!Array.isArray(responseJson) || responseJson[0].price_usd == null) {
-                                     console.log(`Unexpected result from ${this.globals.getMarketApi().name} API.`);
-                                     this.setState({apiError: `Unexpected result from ${this.globals.getMarketApi().name} API.`});
+                                     console.log(`Unexpected result from CoinMarketCap API.`);
+                                     this.setState({apiError: `Unexpected result from CoinMarketCap API.`});
                                  }
                                  let exchange = {
                                      "price": responseJson[0].price_usd,
-                                     "name": this.globals.getMarketApi().name,
+                                     "name": "CoinMarketCap",
                                      "date": new Date().getTime().toString()
                                  }
                                  let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
@@ -94,12 +99,12 @@ export default class WelcomeScreen extends Component {
                                  console.log("db state after exchange is now: " + JSON.stringify(this.state.db));
                              })
                              .catch(error => {
-                                 this.setState({apiError: `Error connecting to the ${this.globals.getMarketApi().name} API.`});
-                                 console.log(`Error connecting to the ${this.globals.getMarketApi().name} API`);
+                                 this.setState({apiError: `Error connecting to the CoinMarketCap API.`});
+                                 console.log(`Error connecting to the CoinMarketCap API`);
                              });
                      }).catch(error => {
-                         this.setState({apiError: `Error connecting to the ${this.globals.getBlockchainApi().name} API.`});
-                         console.log(`Error connecting to the ${this.globals.getBlockchainApi().name} API.`);
+                         this.setState({apiError: `Error connecting to the Explorer API.`});
+                         console.log(`Error connecting to the Explorer API.`);
                      });
                  } else {
                      this.setState({loaded: true, refreshing: false});
@@ -114,65 +119,36 @@ export default class WelcomeScreen extends Component {
     }
 
     static navigationOptions = ({navigate, navigation}) => ({
-        title: GlobalConstants.getAppName() + " Balance",
+        title: "Garlicoin Balance",
         headerLeft: null,
+        headerTintColor: "#FFFFFF",
+        headerStyle: {
+            backgroundColor: "#FFC107",
+        },
         gesturesEnabled: false
     })
 
     render() {
         const {navigate} = this.props.navigation;
 
-        let visibletext = null;
+        let addressCards = null;
         if(this.state.loaded) {
-            visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={require('../assets/images/litecoin_symbol.png')}/>
-                    <Text style={styles.viewTitleL}>Total Balance:</Text>
-                    <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.globals.getCoinTicker()}</Text>
+            addressCards = (
+                <Card wrapperStyle={styles.card}>
+                    <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} GRLC</Text>
                     <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
                 </Card>
             );
         } else {
-            visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={require('../assets/images/litecoin_symbol.png')}/>
-                    <Text style={styles.viewTitleL}>Total Balance</Text>
+            addressCards = (
+                <Card wrapperStyle={styles.card}>
                     <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
-                </Card>
-            );
-        }
-
-        if(this.state.apiError != null) {
-            visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={require('../assets/images/litecoin_symbol.png')}/>
-                    <Text style={styles.viewTitleL}>Total Balance</Text>
-                    <Text style={styles.error} size="small">{this.state.apiError}</Text>
-                    <Text style={styles.refresh} size="small" onPress={() => this.initView()}>Refresh Now</Text>
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
                 </Card>
             );
         }
 
         return (
-            <ScrollView horizontal={false}
+            <View style={{flex: 1}}
                         refreshControl={
                             <RefreshControl
                                 enabled={true}
@@ -180,12 +156,10 @@ export default class WelcomeScreen extends Component {
                                 onRefresh={() => this.initView()}
                             />
                         }>
-                { visibletext }
-                <View style={styles.donateContainer}>
-                    <Text style={styles.donateTitle}>Donate to our {this.globals.getCoinName()} development</Text>
-                    <Text selectable={true} style={styles.donateAddress}>{this.globals.donate}</Text>
-                </View>
-            </ScrollView>
+                
+                {addressCards}
+                    <ActionButton onPress={() => navigate('AddAddress')} buttonColor={"#FFC107"} />
+            </View>
         );
     }
 }
