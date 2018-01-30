@@ -2,15 +2,13 @@ import React from 'react';
 import { StyleSheet, Text, View, Image, Clipboard, Platform, StatusBar } from 'react-native';
 import BarcodeScanner from './components/barcodeScanner.js';
 import AddAddress from './components/addAddress.js';
-import ManageAddresses from './components/manageAddresses.js';
 import WelcomeScreen from './components/welcomeScreen.js';
 import { StackNavigator } from 'react-navigation';
 
 export const Coinhark = StackNavigator({
     Home: { screen: WelcomeScreen },
     AddAddress: { screen: AddAddress },
-    Scanner: { screen: BarcodeScanner },
-    ManageAddresses: { screen: ManageAddresses }
+    Scanner: { screen: BarcodeScanner }
 });
 
 const instructions = Platform.select({

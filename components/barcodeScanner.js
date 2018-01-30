@@ -13,8 +13,12 @@ export default class BarcodeScanner extends Component {
     }
 
     static navigationOptions = {
-        title: "Garlicoin Balance",
-        gesturesEnabled: false
+        title: "Scan Your Address QR",
+        headerTintColor: "#FFFFFF",
+        headerStyle: {
+            backgroundColor: "#FFC107",
+        },
+        gesturesEnabled: false,
     };
 
     async componentWillMount() {

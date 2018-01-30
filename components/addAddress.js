@@ -46,18 +46,18 @@ export default class AddAddress extends Component {
 
         if (this.props.navigation.state != null && this.props.navigation.state.params != null) {
             this.setState({"address": this.props.navigation.state.params.scanned});
-            console.log("Setting address state from params.scanned: " + this.props.navigation.state.params.scanned);
         }
     }
 
     static navigationOptions = ({navigate, navigation}) => ({
-        title: "Garlicoin Balance",
+        title: "Add An Address",
         gesturesEnabled: false,
-        headerLeft: <Icon name="keyboard-backspace" style={styles.leftButton} onPress={() => {
-            navigation.navigate('ManageAddresses');
-        }}/>,
-        headerRight: <Icon name="qrcode" style={styles.rightButton} onPress={() => {
-            navigation.navigate('Scanner');
+        headerTintColor: "#FFFFFF",
+        headerStyle: {
+            backgroundColor: "#FFC107",
+        },
+        headerLeft: <Icon name="arrow-left" style={styles.leftButton} onPress={() => {
+            navigation.navigate('Home');
         }}/>,
     })
 
@@ -81,7 +81,7 @@ export default class AddAddress extends Component {
                 tmpDb.balanceInfo.addresses.push(address);
                 this.setState({db: tmpDb});
                 AsyncStorage.setItem("db", JSON.stringify(this.state.db));
-                this.props.navigation.navigate('ManageAddresses');
+                this.props.navigation.navigate('Home');
             } else {
                 this.setState({invalidAddress: true});
             }
@@ -91,14 +91,27 @@ export default class AddAddress extends Component {
     render() {
         const { navigate } = this.props.navigation;
         return (
-            <Card title="Add Public Address">
-                <FormLabel>Address</FormLabel>
-                <FormInput
-                    autoCorrect={false}
-                    inputStyle={{ fontSize: 14 }}
-                    onBlur={() => this.setState({addressDirty: true})}
-                    onChangeText={(address) => this.setState({address})}
-                    value={this.state.address}/>
+            <Card>
+                <View style={{flexDirection: "row"}}>
+                    <View style={{flex: 1, justifyContent: 'center'}}>
+                        <FormInput
+                            autoCorrect={false}
+                            inputStyle={{ fontSize: 16, color: "#0e0e0e" }}
+                            onBlur={() => this.setState({addressDirty: true})}
+                            onChangeText={(address) => this.setState({address})}
+                            value={this.state.address}
+                            placeholder={"Address"}
+                        />
+                    </View>
+                    <Button
+                        onPress={() => { navigate('Scanner');} }
+                        icon={{name: 'qrcode', type: 'material-community', color: 'black'}}
+                        style={{justifyContent: 'center'}}
+                        transparent
+                    />
+                </View>
+                
+                
                 {renderIf(this.state.address === '' && this.state.addressDirty, <FormValidationMessage style>
                     {'This field is required'}
                 </FormValidationMessage>)}
@@ -108,13 +121,15 @@ export default class AddAddress extends Component {
                 {renderIf(this.state.addressExists && this.state.address !== '', <FormValidationMessage style>
                     {'This address already exists'}
                 </FormValidationMessage>)}
-                <FormLabel>Name</FormLabel>
+
                 <FormInput
                     autoCorrect={false}
-                    inputStyle={{ fontSize: 14 }}
+                    inputStyle={{ fontSize: 16, color: "#0e0e0e" }}
                     onBlur={() => this.setState({nameDirty: true})}
                     onChangeText={(name) => this.setState({name})}
-                    value={this.state.name}/>
+                    value={this.state.name}
+                    placeholder={"Nickname"}
+                />
                 {renderIf(this.state.name === '' && this.state.nameDirty, <FormValidationMessage style>
                     {'This field is required'}
                 </FormValidationMessage>)}
@@ -123,7 +138,7 @@ export default class AddAddress extends Component {
                     containerViewStyle={styles.buttonStyle}
                     onPress={this._submitAddress}
                     raised
-                    backgroundColor={'#2196f3'}
+                    backgroundColor={'#ffc107'}
                     title='Submit Address'
                 />
             </Card>
@@ -138,11 +153,11 @@ const styles = {
     rightButton: {
         marginRight: 16,
         fontSize: 26,
-        color: '#555555',
+        color: '#ffffff',
     },
     leftButton: {
         marginLeft: 16,
         fontSize: 26,
-        color: '#555555',
+        color: '#ffffff',
     },
 }

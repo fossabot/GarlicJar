@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
-import { FormLabel, FormInput, Button, Card } from 'react-native-elements';
+import { FormLabel, FormInput, Button, Card, List, ListItem } from 'react-native-elements';
 import ActionButton from 'react-native-action-button';
 import GlobalConstants from '../globals';
 import Numbers from '../utils/numbers';
@@ -11,8 +11,10 @@ export default class WelcomeScreen extends Component {
         this.state = {
             totalBalance: 0.00000000,
             valueInDollars: 0.00,
+            allBalances: [],
             loaded: false,
             refreshing: false,
+            empty: false,
             apiError: null,
             db: {
                 "balanceInfo": {
@@ -44,14 +46,12 @@ export default class WelcomeScreen extends Component {
              if (value == null) {
                  // init db
                  AsyncStorage.setItem("db", JSON.stringify(this.globals.bareDb));
-                 console.log("Creating new db of: " + JSON.stringify(this.state.db));
                  this.setState({db: this.globals.bareDb})
-                 console.log("db state is now bare: " + JSON.stringify(this.state.db));
                  this.setState({loaded: true, refreshing: false});
              } else {
                  this.setState({db: JSON.parse(value)});
-                 console.log("db state is now: " + JSON.stringify(this.state.db));
                  if (this.state.db.balanceInfo.addresses.length > 0) {
+                     this.setState({empty: false});
                      Promise.all(this.state.db.balanceInfo.addresses.map(o =>
                          fetch(`https://explorer.grlc-bakery.fun/ext/getaddress/${o.inputAddress}`).then(resp => resp.json()) // TODO: replace with global getBlockchainApi
                      )).then(json => {
@@ -59,10 +59,7 @@ export default class WelcomeScreen extends Component {
                              console.log(`Unexpected result from Explorer API.`);
                              this.setState({apiError: `Unexpected result from Explorer API.`});
                          }
-                         // TODO: change this to return a total and an array of addresses and balances.
-                         // totalBalance: ret
-                         // balances: [{address: string, balance: 0.0m}, etc]
-                         // then we can do a foreach on the cards
+
                          let ret = json.reduce((agg, elem) => {
                              var tmpDb = this.state.db;
                              tmpDb.balanceInfo.addresses.forEach((a) => {
@@ -74,10 +71,16 @@ export default class WelcomeScreen extends Component {
                              tmpDb.balanceInfo.date = new Date().getTime().toString();
                              this.setState({db: tmpDb});
                              AsyncStorage.setItem("db", JSON.stringify(tmpDb));
-                             console.log("db state is now: " + JSON.stringify(this.state.db));
                              return agg + parseFloat(elem.balance);
                          }, 0);
-                         this.setState({totalBalance: ret});
+                         let allBalances = json.map(a => {
+                             return {
+                                 nickname: this.state.db.balanceInfo.addresses.filter(b => b.address == a.address)[0].name,
+                                 address: a.address,
+                                 balance: a.balance
+                             };
+                         });
+                         this.setState({totalBalance: ret, allBalances});
                      }).then(bal => {
                          fetch("https://api.coinmarketcap.com/v1/ticker/garlicoin/") // TODO: replace with global getMarketApi
                              .then(response => response.json())
@@ -96,7 +99,6 @@ export default class WelcomeScreen extends Component {
                                  tmpDb.exchange = exchange;
                                  this.setState({valueInDollars: value, loaded: true, refreshing: false, db: tmpDb});
                                  AsyncStorage.setItem("db", JSON.stringify(this.state.db));
-                                 console.log("db state after exchange is now: " + JSON.stringify(this.state.db));
                              })
                              .catch(error => {
                                  this.setState({apiError: `Error connecting to the CoinMarketCap API.`});
@@ -107,7 +109,7 @@ export default class WelcomeScreen extends Component {
                          console.log(`Error connecting to the Explorer API.`);
                      });
                  } else {
-                     this.setState({loaded: true, refreshing: false});
+                     this.setState({loaded: true, refreshing: false, empty: true});
                  }
              }
          }).done();
@@ -115,7 +117,6 @@ export default class WelcomeScreen extends Component {
 
     _onRefresh() {
         this.setState({refreshing: true});
-        console.log('refreshing');
     }
 
     static navigationOptions = ({navigate, navigation}) => ({
@@ -130,108 +131,65 @@ export default class WelcomeScreen extends Component {
 
     render() {
         const {navigate} = this.props.navigation;
+        const { empty } = this.state;
 
         let addressCards = null;
-        if(this.state.loaded) {
-            addressCards = (
-                <Card wrapperStyle={styles.card}>
-                    <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} GRLC</Text>
-                    <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
-                </Card>
-            );
-        } else {
-            addressCards = (
-                <Card wrapperStyle={styles.card}>
-                    <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
-                </Card>
-            );
+        if(!this.state.loaded) {
+            addressCards = <ActivityIndicator style={styles.loadingSpinnerIndicator} size="large" color="#FFC107" />;
         }
 
         return (
-            <View style={{flex: 1}}
-                        refreshControl={
-                            <RefreshControl
-                                enabled={true}
-                                refreshing={this.state.refreshing}
-                                onRefresh={() => this.initView()}
-                            />
-                        }>
-                
-                {addressCards}
-                    <ActionButton onPress={() => navigate('AddAddress')} buttonColor={"#FFC107"} />
+            <View style={{flex: 1}}>
+                {empty &&
+                <Card containerStyle={styles.getStartedCtaCardContainer} wrapperStyle={styles.getStartedCtaCardWrapper}>
+                    <Image style={styles.getStartedCtaIcon} source={require("../assets/images/empty_garlicoin_symbol.png")} />
+                    <Text style={styles.getStartedCtaText}>It looks like you haven't added any addresses yet. To add one, press the floating yellow 'add' button below.</Text>
+                </Card>}
+                <ScrollView refreshControl={<RefreshControl enabled refreshing={this.state.refreshing} onRefresh={() => this.initView()} />}>
+                    <List containerStyle={styles.addressListContainer}>
+                        {addressCards || this.state.allBalances.map(a => {
+                            return <ListItem key={`address-${a.address}`} title={a.nickname} subtitle={`${Numbers.formatBalance(a.balance, 'US')} GRLC`} wrapperStyle={{paddingTop: 2, paddingBottom: 2}} />;
+                        })}
+                    </List>
+                    
+                </ScrollView>
+                <ActionButton onPress={() => navigate('AddAddress')} buttonColor={"#FFC107"} />
             </View>
         );
     }
 }
 
 const styles = StyleSheet.create({
-    card: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 0
-    },
     error: {
         marginTop: 28,
         marginBottom: 28,
         color: '#DC143C',
     },
-    viewTitleSpinner: {
+    loadingSpinnerIndicator: {
         marginTop: 28,
         marginBottom: 28
     },
-    viewTitleL: {
-        marginTop: 35,
-        marginBottom: 5,
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'left',
-        color: '#34495e',
+    getStartedCtaCardContainer: {
+        backgroundColor: "transparent"
     },
-    viewTitle: {
-        margin: 5,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'left',
-        color: '#34495e',
-    },
-    viewTitleSM: {
-        marginBottom: 24,
-        fontSize: 14,
-        textAlign: 'left',
-        color: '#34495e',
-    },
-    donateContainer: {
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 36,
-    },
-    donateTitle: {
-        margin: 5,
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#34495e',
-        marginBottom: 4
-    },
-    donateAddress: {
-        margin: 5,
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#34495e',
-        marginBottom: 8,
-    },
-    rightButton: {
-        marginRight: 16,
-        fontSize: 26,
-        color: '#555555',
-    },
-    symbol: {
-        width: 120,
-        height: 120,
+    getStartedCtaCardWrapper: {
+        borderWidth: 0,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    getStartedCtaIcon: {
+        width: 100,
+        height: 100,
+        marginBottom: 10,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    getStartedCtaText: {
+        textAlign: "center",
+        fontSize: 16
+    },
+    addressListContainer: {
+        marginTop: 0,
+        borderBottomColor: "#dddddd"
     }
 });
