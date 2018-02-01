@@ -14,7 +14,7 @@ export default class BarcodeScanner extends Component {
 
     static navigationOptions = {
         title: "Scan Your Address QR",
-        headerTintColor: "#FFFFFF",
+        headerTintColor: "#0e0e0e",
         headerStyle: {
             backgroundColor: "#FFC107",
         },
@@ -23,6 +23,7 @@ export default class BarcodeScanner extends Component {
 
     async componentWillMount() {
         Keyboard.dismiss();
+        styles.rectangle.backgroundColor = "transparent";
     }
 
     render() {
@@ -41,6 +42,7 @@ export default class BarcodeScanner extends Component {
     }
 
     _onBarCodeRead = ({type, data}) => {
+        styles.rectangle.backgroundColor = "rgba(0, 0, 0, 0.25)";
         let scan = data;
         this.count += 1;
         if (this.count === 1) {
@@ -83,7 +85,8 @@ var styles = StyleSheet.create({
         height: 300,
         width: 300,
         borderWidth: 2,
-        borderColor: '#FFFFFF',
+        borderRadius: 3,
+        borderColor: '#FFC107',
         backgroundColor: 'transparent',
     },
 });

@@ -52,7 +52,15 @@ class GlobalConstants {
           "GRLC": {
             "symbol": require("./assets/images/garlicoin_symbol.png")
           }
-        }
+        },
+
+        this.userSettings = [
+            {"Theme": "Light"}
+        ],
+
+        this.possibleSettings = [
+            {"Theme": ["Light", "Dark", "Black"]}
+        ]
 
         /*
         Example db:
@@ -135,6 +143,14 @@ class GlobalConstants {
 
     getAssets() {
         return this.assets[this.coin];
+    }
+
+    getUserSettings() {
+        return this.userSettings;
+    }
+
+    getPossibleUserSettings() {
+        return this.possibleSettings;
     }
 
     validateAddress(address, component) {

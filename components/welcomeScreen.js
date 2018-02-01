@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
-import { FormLabel, FormInput, Button, Card, List, ListItem } from 'react-native-elements';
+import { FormLabel, FormInput, Button, Card, List, ListItem, Icon } from 'react-native-elements';
 import ActionButton from 'react-native-action-button';
 import GlobalConstants from '../globals';
 import Numbers from '../utils/numbers';
@@ -122,10 +122,13 @@ export default class WelcomeScreen extends Component {
     static navigationOptions = ({navigate, navigation}) => ({
         title: "Garlicoin Balance",
         headerLeft: null,
-        headerTintColor: "#FFFFFF",
+        headerTintColor: "#0e0e0e",
         headerStyle: {
             backgroundColor: "#FFC107",
         },
+        headerRight: <Icon name="more-vert" style={styles.rightButton} onPress={() => {
+            navigation.navigate('Settings');
+        }}/>,
         gesturesEnabled: false
     })
 
@@ -139,21 +142,21 @@ export default class WelcomeScreen extends Component {
         }
 
         return (
-            <View style={{flex: 1}}>
+            <View style={{flex: 1, backgroundColor: "#ffffff"}}>
                 {empty &&
                 <Card containerStyle={styles.getStartedCtaCardContainer} wrapperStyle={styles.getStartedCtaCardWrapper}>
                     <Image style={styles.getStartedCtaIcon} source={require("../assets/images/empty_garlicoin_symbol.png")} />
                     <Text style={styles.getStartedCtaText}>It looks like you haven't added any addresses yet. To add one, press the floating yellow 'add' button below.</Text>
                 </Card>}
+                {!empty &&
                 <ScrollView refreshControl={<RefreshControl enabled refreshing={this.state.refreshing} onRefresh={() => this.initView()} />}>
                     <List containerStyle={styles.addressListContainer}>
                         {addressCards || this.state.allBalances.map(a => {
-                            return <ListItem key={`address-${a.address}`} title={a.nickname} subtitle={`${Numbers.formatBalance(a.balance, 'US')} GRLC`} wrapperStyle={{paddingTop: 2, paddingBottom: 2}} />;
+                            return <ListItem key={`address-${a.address}`} title={a.nickname} subtitle={`${Numbers.formatBalance(a.balance, 'US')} GRLC`} wrapperStyle={{paddingTop: 2, paddingBottom: 2}} onPress={() => navigate('ViewAddress', {addressId: a.address})} />;
                         })}
                     </List>
-                    
-                </ScrollView>
-                <ActionButton onPress={() => navigate('AddAddress')} buttonColor={"#FFC107"} />
+                </ScrollView>}
+                <ActionButton onPress={() => navigate('AddAddress')} buttonColor={"#FFC107"} buttonTextStyle={{color: "#0e0e0e"}} />
             </View>
         );
     }
@@ -165,15 +168,20 @@ const styles = StyleSheet.create({
         marginBottom: 28,
         color: '#DC143C',
     },
+    rightButton: {
+        paddingLeft: "-5"
+    },
     loadingSpinnerIndicator: {
         marginTop: 28,
         marginBottom: 28
     },
     getStartedCtaCardContainer: {
-        backgroundColor: "transparent"
+        elevation: 0,
+        shadowColor: 'rgba(0,0,0,0)',
+        backgroundColor: "transparent",
+        borderColor: "transparent"
     },
     getStartedCtaCardWrapper: {
-        borderWidth: 0,
         justifyContent: 'center',
         alignItems: 'center',
     },

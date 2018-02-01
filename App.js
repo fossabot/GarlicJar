@@ -3,12 +3,16 @@ import { StyleSheet, Text, View, Image, Clipboard, Platform, StatusBar } from 'r
 import BarcodeScanner from './components/barcodeScanner.js';
 import AddAddress from './components/addAddress.js';
 import WelcomeScreen from './components/welcomeScreen.js';
+import SettingsScreen from './components/settingsScreen.js';
+import ViewAddressScreen from './components/viewAddressScreen.js';
 import { StackNavigator } from 'react-navigation';
 
 export const Coinhark = StackNavigator({
     Home: { screen: WelcomeScreen },
     AddAddress: { screen: AddAddress },
-    Scanner: { screen: BarcodeScanner }
+    Scanner: { screen: BarcodeScanner },
+    Settings: { screen: SettingsScreen },
+    ViewAddress: { screen: ViewAddressScreen }
 });
 
 const instructions = Platform.select({
@@ -27,7 +31,7 @@ export default class App extends React.Component {
     render() {
         return (
         <View style={{flex: 1}}>
-            <StatusBar backgroundColor={"#FFC107"} barStyle="light-content"/>
+            <StatusBar backgroundColor={"#FFC107"} barStyle="dark-content"/>
             <Coinhark />
         </View>
         );

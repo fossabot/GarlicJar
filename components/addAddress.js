@@ -52,7 +52,7 @@ export default class AddAddress extends Component {
     static navigationOptions = ({navigate, navigation}) => ({
         title: "Add An Address",
         gesturesEnabled: false,
-        headerTintColor: "#FFFFFF",
+        headerTintColor: "#0e0e0e",
         headerStyle: {
             backgroundColor: "#FFC107",
         },
@@ -101,6 +101,7 @@ export default class AddAddress extends Component {
                             onChangeText={(address) => this.setState({address})}
                             value={this.state.address}
                             placeholder={"Address"}
+                            underlineColorAndroid={"#FFC107"}
                         />
                     </View>
                     <Button
@@ -129,6 +130,7 @@ export default class AddAddress extends Component {
                     onChangeText={(name) => this.setState({name})}
                     value={this.state.name}
                     placeholder={"Nickname"}
+                    underlineColorAndroid={"#FFC107"}
                 />
                 {renderIf(this.state.name === '' && this.state.nameDirty, <FormValidationMessage style>
                     {'This field is required'}
@@ -158,6 +160,6 @@ const styles = {
     leftButton: {
         marginLeft: 16,
         fontSize: 26,
-        color: '#ffffff',
+        color: '#0e0e0e',
     },
 }
