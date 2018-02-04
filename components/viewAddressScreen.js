@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { ScrollView, View, StyleSheet, Text, Keyboard, Modal } from 'react-native';
-import { FormLabel, FormInput, Button, Card, List, ListItem } from 'react-native-elements';
+import { ScrollView, View, StyleSheet, Keyboard, Modal } from 'react-native';
+import { FormLabel, FormInput, Button, Card, List, ListItem, Text } from 'react-native-elements';
 import GlobalConstants from '../globals';
 import Numbers from '../utils/numbers';
 
@@ -38,12 +38,26 @@ export default class ViewAddressScreen extends Component {
         const { settings, showModal, possibleSettings } = this.state;
         const { params } = this.props.navigation.state;
 
+        if(!params.addressId) {
+            return <View><Text>Error: address not provided</Text></View>;
+        }
+
         return (
             <ScrollView style={{flex: 1, backgroundColor: "#ffffff"}}>
                 <View>
-                    <Text>Address: {params.addressId}</Text>
-                    <Text>QR code in header?</Text>
-                    <Text>Txns for address</Text>
+                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>{params.addressId}</Text>
+                    <ScrollView>
+                        <List>
+                            <ListItem
+                            key={`0`}
+                            title={`2408ae...94be2f`}
+                            rightTitle={`+1.75432 GRLC`}
+                            hideChevron
+                            titleNumberOfLines={1}
+                            >
+                            </ListItem>
+                        </List>
+                    </ScrollView>
                 </View>
             </ScrollView>
         );

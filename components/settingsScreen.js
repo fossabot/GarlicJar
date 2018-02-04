@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { ScrollView, View, StyleSheet, Text, Keyboard, Modal } from 'react-native';
+import { ScrollView, View, StyleSheet, Text, Keyboard, Modal, Picker } from 'react-native';
 import { FormLabel, FormInput, Button, Card, List, ListItem } from 'react-native-elements';
 import GlobalConstants from '../globals';
 import Numbers from '../utils/numbers';
@@ -13,7 +13,7 @@ export default class SettingsScreen extends Component {
 
         this.state = {
             settings: [],
-            showModal: false,
+            showPicker: null,
             possibleSettings: []
         }
 
@@ -26,14 +26,20 @@ export default class SettingsScreen extends Component {
      }
 
     fillSettings = () => {
-         this.setState({ settings: this.globals.getUserSettings(), possibleSettings: this.globals.getPossibleUserSettings() })
+         this.setState({ settings: this.globals.getUserSettings() })
      }
-
-    openModal = () =>
-        this.setState({showModal: true});
     
-    closeModal = () =>
-        this.setState({showModal: false});
+    setPickerValue = (key, selectedValue) => {
+        this.globals.setUserSetting(key, selectedValue);
+        this.setState({settings: {
+            ...this.state.settings,
+            [key]: {
+                ...this.state.settings[key],
+                selected: selectedValue
+            }
+        }});
+    }
+        
 
     static navigationOptions = ({navigate, navigation}) => ({
         title: "Settings",
@@ -44,26 +50,43 @@ export default class SettingsScreen extends Component {
         gesturesEnabled: false
     })
 
+    settingsToList = () => {
+        const { settings } = this.state;
+        
+        let listOfSettings = [];
+
+        
+        for (let key in settings) {
+            if (!settings.hasOwnProperty(key)) continue;
+
+            let currentSetting = settings[key];
+            listOfSettings.push(<Text key={`label-${Math.floor(Math.random() * 200)}`}>{key}</Text>);
+            listOfSettings.push(
+            <Picker
+            key={`setting-${key}`}
+            selectedValue={currentSetting.selected}
+            onValueChange={(value, i) => this.setPickerValue(key, value)}
+            prompt={key}>
+                {currentSetting.options.map(o => {
+                    return <Picker.Item key={`setting-item-${Math.floor(Math.random() * 200)}`} label={o} value={o} />
+                })}
+            </Picker>);
+        }
+        return <View>{listOfSettings}</View>;
+    }
+
     
 
     render() {
-        const {navigate} = this.props.navigation;
-        const { settings, showModal, possibleSettings } = this.state;
+        const { navigate } = this.props.navigation;
+        const { settings, showPicker } = this.state;
 
         return (
-            <ScrollView style={{flex: 1, backgroundColor: "#ffffff"}}>
-                <List containerStyle={styles.settingsListContainer}>
-                    {settings.map(s => {
-                        return <ListItem 
-                        key={`setting-${Object.keys(s)[0]}`}
-                        title={Object.keys(s)[0]}
-                        rightTitle={Object.values(s)[0]}
-                        wrapperStyle={{paddingTop: 2, paddingBottom: 2}}
-                        hideChevron
-                        onPress={() => this.openModal()}
-                        />;
-                    })}
-                </List>
+            <ScrollView style={{flex: 1, backgroundColor: "#ffffff", paddingLeft: 1, paddingTop: 3}}>
+                {this.settingsToList()}
+                
+                <Text style={{paddingTop: 55}}>version: {this.globals.getAppVersion()}</Text>
+                
             </ScrollView>
         );
     }

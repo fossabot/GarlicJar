@@ -24,24 +24,21 @@ class GlobalConstants {
         // APIs
         
         // Grab pricing data from these APIs
-        this.marketApi = [
-            {
-                "name": "CoinMarketCap",
+        this.marketApi = {
+            "CoinMarketCap": {
                 "url": "https://api.coinmarketcap.com/v1/ticker/garlicoin/",
             }
-        ];
+        };
 
         // Grab address and txn information from these APIs
-        this.blockchainApi = [
-            {
-                "name": "GRLC Bakery Explorer",
+        this.blockchainApi = {
+            "GRLC Bakery Explorer": {
                 "url": "https://explorer.grlc-bakery.fun/ext/getaddress/",
             },
-            {
-                "name": "Official API",
+            "Official API": {
                 "url": "https://explorer.garlicoin.io/ext/getaddress/",
             }
-        ];
+        };
 
         ////////////////////////////////////////
         // Local database
@@ -58,7 +55,24 @@ class GlobalConstants {
                 "date": "1318464000",
                 "name": "CoinMarketCap",
             }
-        }
+        };
+
+        this.settings = {
+            "Theme": {
+                "selected": "light",
+                "options": [
+                    "light",
+                    "dark",
+                    "black"
+                ]
+            },
+            "Language": {
+                "selected": "English (United Kingdom)",
+                "options": [
+                    "English (United Kingdom)"
+                ]
+            }
+        };
     }
 
     ////////////////////////////////////////
@@ -77,7 +91,26 @@ class GlobalConstants {
     }
 
     getMarketApi() {
-        return this.marketApi;
+        let successfulApi;
+        let exampleAddress = "GU2NtcNotWFiZjTp2Vdgf5CjeMfgsWYCua";
+        let successful = false;
+        while(!successful) {
+            for(let api in this.marketApi) {
+                // skip loop if the property is from prototype
+                // source: https://stackoverflow.com/a/921808
+                if (!this.marketApi.hasOwnProperty(api)) continue;
+    
+                var currentApi = this.marketApi[api];
+    
+                // get first API that returns 200 OK
+                fetch(`${currentApi.url}${exampleAddress}`).then(res => res.json()).catch(e => false).then(res => {
+                    successfulApi = currentApi;
+                    successful = true;
+                });
+            }
+        }
+        
+        return successfulApi;
     }
 
     getBlockchainApi() {
@@ -86,6 +119,10 @@ class GlobalConstants {
 
     getAssets() {
         return this.assets[this.coin];
+    }
+
+    getSettings() {
+        return this.settings;
     }
 }
 

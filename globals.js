@@ -10,7 +10,9 @@ class GlobalConstants {
         // Edit this for cointype (Ex: ltc, etc)
         this.coin = 'GRLC';
 
-        this.donate = 'LVwutf6xmtKGXtS9KsgCUMHEmoEix7TvQj'
+        this.donate = 'LVwutf6xmtKGXtS9KsgCUMHEmoEix7TvQj';
+
+        this.appVersion = "0.2.0-alpha";
 
         this.coinInfo = {
             "GRLC": {
@@ -52,15 +54,24 @@ class GlobalConstants {
           "GRLC": {
             "symbol": require("./assets/images/garlicoin_symbol.png")
           }
-        },
+        };
 
-        this.userSettings = [
-            {"Theme": "Light"}
-        ],
-
-        this.possibleSettings = [
-            {"Theme": ["Light", "Dark", "Black"]}
-        ]
+        this.settings = {
+            "Theme": {
+                "selected": "Light",
+                "options": [
+                    "Light",
+                    "Dark",
+                    "Black"
+                ]
+            },
+            "Language": {
+                "selected": "English (United Kingdom)",
+                "options": [
+                    "English (United Kingdom)"
+                ]
+            }
+        };
 
         /*
         Example db:
@@ -104,7 +115,11 @@ class GlobalConstants {
 
     // Edit this for cointype (Ex: Litecoin Balance, Bitcoin Balance, etc)
     static getAppName() {
-        return "Litecoin Balance";
+        return "Garlicoin Balance";
+    }
+
+    getAppVersion() {
+        return this.appVersion;
     }
 
     getCoinName() {
@@ -146,11 +161,11 @@ class GlobalConstants {
     }
 
     getUserSettings() {
-        return this.userSettings;
+        return this.settings;
     }
 
-    getPossibleUserSettings() {
-        return this.possibleSettings;
+    setUserSetting(key, selectedValue) {
+        this.settings[key]["selected"] = selectedValue;
     }
 
     validateAddress(address, component) {

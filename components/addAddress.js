@@ -91,59 +91,61 @@ export default class AddAddress extends Component {
     render() {
         const { navigate } = this.props.navigation;
         return (
-            <Card>
-                <View style={{flexDirection: "row"}}>
-                    <View style={{flex: 1, justifyContent: 'center'}}>
-                        <FormInput
-                            autoCorrect={false}
-                            inputStyle={{ fontSize: 16, color: "#0e0e0e" }}
-                            onBlur={() => this.setState({addressDirty: true})}
-                            onChangeText={(address) => this.setState({address})}
-                            value={this.state.address}
-                            placeholder={"Address"}
-                            underlineColorAndroid={"#FFC107"}
+            <View style={{flex: 1, backgroundColor: "#ffffff"}}>
+                <Card>
+                    <View style={{flexDirection: "row"}}>
+                        <View style={{flex: 1, justifyContent: 'center'}}>
+                            <FormInput
+                                autoCorrect={false}
+                                inputStyle={{ fontSize: 16, color: "#0e0e0e" }}
+                                onBlur={() => this.setState({addressDirty: true})}
+                                onChangeText={(address) => this.setState({address})}
+                                value={this.state.address}
+                                placeholder={"Address"}
+                                underlineColorAndroid={"#FFC107"}
+                            />
+                        </View>
+                        <Button
+                            onPress={() => { navigate('Scanner');} }
+                            icon={{name: 'qrcode', type: 'material-community', color: 'black'}}
+                            style={{justifyContent: 'center'}}
+                            transparent
                         />
                     </View>
-                    <Button
-                        onPress={() => { navigate('Scanner');} }
-                        icon={{name: 'qrcode', type: 'material-community', color: 'black'}}
-                        style={{justifyContent: 'center'}}
-                        transparent
-                    />
-                </View>
-                
-                
-                {renderIf(this.state.address === '' && this.state.addressDirty, <FormValidationMessage style>
-                    {'This field is required'}
-                </FormValidationMessage>)}
-                {renderIf(this.state.invalidAddress && this.state.address !== '', <FormValidationMessage style>
-                    {'Invalid Garlicoin Address'}
-                </FormValidationMessage>)}
-                {renderIf(this.state.addressExists && this.state.address !== '', <FormValidationMessage style>
-                    {'This address already exists'}
-                </FormValidationMessage>)}
+                    
+                    
+                    {renderIf(this.state.address === '' && this.state.addressDirty, <FormValidationMessage style>
+                        {'This field is required'}
+                    </FormValidationMessage>)}
+                    {renderIf(this.state.invalidAddress && this.state.address !== '', <FormValidationMessage style>
+                        {'Invalid Garlicoin Address'}
+                    </FormValidationMessage>)}
+                    {renderIf(this.state.addressExists && this.state.address !== '', <FormValidationMessage style>
+                        {'This address already exists'}
+                    </FormValidationMessage>)}
 
-                <FormInput
-                    autoCorrect={false}
-                    inputStyle={{ fontSize: 16, color: "#0e0e0e" }}
-                    onBlur={() => this.setState({nameDirty: true})}
-                    onChangeText={(name) => this.setState({name})}
-                    value={this.state.name}
-                    placeholder={"Nickname"}
-                    underlineColorAndroid={"#FFC107"}
-                />
-                {renderIf(this.state.name === '' && this.state.nameDirty, <FormValidationMessage style>
-                    {'This field is required'}
-                </FormValidationMessage>)}
-                <Button
-                    disabled={this._checkDisabled()}
-                    containerViewStyle={styles.buttonStyle}
-                    onPress={this._submitAddress}
-                    raised
-                    backgroundColor={'#ffc107'}
-                    title='Submit Address'
-                />
-            </Card>
+                    <FormInput
+                        autoCorrect={false}
+                        inputStyle={{ fontSize: 16, color: "#0e0e0e" }}
+                        onBlur={() => this.setState({nameDirty: true})}
+                        onChangeText={(name) => this.setState({name})}
+                        value={this.state.name}
+                        placeholder={"Nickname"}
+                        underlineColorAndroid={"#FFC107"}
+                    />
+                    {renderIf(this.state.name === '' && this.state.nameDirty, <FormValidationMessage style>
+                        {'This field is required'}
+                    </FormValidationMessage>)}
+                    <Button
+                        disabled={this._checkDisabled()}
+                        containerViewStyle={styles.buttonStyle}
+                        onPress={this._submitAddress}
+                        raised
+                        backgroundColor={'#ffc107'}
+                        title='Submit Address'
+                    />
+                </Card>
+            </View>
         );
     }
 }

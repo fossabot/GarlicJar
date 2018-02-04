@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
 import { FormLabel, FormInput, Button, Card, List, ListItem, Icon } from 'react-native-elements';
 import ActionButton from 'react-native-action-button';
-import GlobalConstants from '../globals';
+import GlobalConstants from '../globals.new';
 import Numbers from '../utils/numbers';
 
 export default class WelcomeScreen extends Component {
