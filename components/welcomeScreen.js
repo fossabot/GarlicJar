@@ -133,11 +133,11 @@ export default class WelcomeScreen extends Component {
     })
 
     render() {
-        const {navigate} = this.props.navigation;
-        const { empty } = this.state;
+        const { navigate } = this.props.navigation;
+        const { empty, loaded, refreshing, allBalances } = this.state;
 
         let addressCards = null;
-        if(!this.state.loaded) {
+        if(!loaded) {
             addressCards = <ActivityIndicator style={styles.loadingSpinnerIndicator} size="large" color="#FFC107" />;
         }
 
@@ -149,10 +149,10 @@ export default class WelcomeScreen extends Component {
                     <Text style={styles.getStartedCtaText}>It looks like you haven't added any addresses yet. To add one, press the floating yellow 'add' button below.</Text>
                 </Card>}
                 {!empty &&
-                <ScrollView refreshControl={<RefreshControl enabled refreshing={this.state.refreshing} onRefresh={() => this.initView()} />}>
+                <ScrollView refreshControl={<RefreshControl enabled refreshing={refreshing} onRefresh={() => this.initView()} />}>
                     <List containerStyle={styles.addressListContainer}>
-                        {addressCards || this.state.allBalances.map(a => {
-                            return <ListItem key={`address-${a.address}`} title={a.nickname} subtitle={`${Numbers.formatBalance(a.balance, 'US')} GRLC`} wrapperStyle={{paddingTop: 2, paddingBottom: 2}} onPress={() => navigate('ViewAddress', {addressId: a.address})} />;
+                        {addressCards || allBalances.map(a => {
+                            return <ListItem key={`address-${a.address}`} title={a.nickname} subtitle={`${Numbers.formatBalance(a.balance, 'US')} GRLC`} wrapperStyle={{paddingTop: 2, paddingBottom: 2}} onPress={() => navigate('ViewAddress', {addressId: a.address, nickname: a.nickname})} />;
                         })}
                     </List>
                 </ScrollView>}
