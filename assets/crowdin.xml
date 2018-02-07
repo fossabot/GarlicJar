@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="title_welcome">Your Wallets</string>
+  <string name="title_settings">Settings</string>
+  <string name="title_add">Add An Address</string>
+  <string name="title_add_scan">Scan Your Address Code</string>
+  <string name="title_share">Share Your Address</string>
+  <string name="setting_theme_title">Theme</string>
+  <string name="setting_theme_option_light">Light</string>
+  <string name="setting_theme_option_dark">Dark</string>
+  <string name="setting_theme_option_black">Black</string>
+  <string name="setting_language_title">Lanugage</string>
+</resources>
