@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { ScrollView, View, StyleSheet, Keyboard, Modal, Alert, ActivityIndicator } from 'react-native';
 import { FormLabel, FormInput, Button, Card, List, ListItem, Text, Icon } from 'react-native-elements';
-import Dialog, { DialogButton } from 'react-native-md-dialog';
+// import Dialog, { DialogButton } from 'react-native-md-dialog'; lazy dev didn't update the package, grr
 import QRCode from 'react-native-qrcode';
 import GlobalConstants from '../globals';
 import Numbers from '../utils/numbers';
@@ -127,11 +127,11 @@ export default class ViewAddressScreen extends Component {
                         </List>
                     </ScrollView>
                 </View>
-                <Dialog actions={[<DialogButton text='CLOSE' onPress={() => this.refs.dialog1.close()} position='right'/>]} ref='dialog1'>
+                {/* <Dialog actions={[<DialogButton text='CLOSE' onPress={() => this.refs.dialog1.close()} position='right'/>]} ref='dialog1'>
                     <View>
                         <QRCode value={params.addressId} size={200} bgColor={'white'} fgColor={'black'} />
                     </View>
-                </Dialog>
+                </Dialog> */}
             </ScrollView>
         );
     }
