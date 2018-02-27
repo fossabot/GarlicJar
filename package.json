@@ -11,6 +11,9 @@
     "bundle-ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/app/src/main/assets/index.ios.bundle --assets-dest ios/app/src/main/res"
   },
   "dependencies": {
+    "appcenter": "^1.3.0",
+    "appcenter-analytics": "^1.3.0",
+    "appcenter-crashes": "^1.3.0",
     "assert": "1.4.1",
     "asyncstorage-down": "^3.0.0",
     "big-integer": "^1.6.26",
