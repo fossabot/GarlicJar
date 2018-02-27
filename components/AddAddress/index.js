@@ -5,6 +5,8 @@ import { Button, FormInput, Icon } from "react-native-elements";
 import coreStyles, { colours } from "../coreStyles";
 import addAddressStyles from "./styles";
 
+import v from "../../utils/validateAddress";
+
 export default class ViewAddressList extends Component {
     constructor(props) {
         super(props);
@@ -49,18 +51,39 @@ export default class ViewAddressList extends Component {
         )
     });
 
-    _submitAddress = async () => {
-        // to-do: possibly reduce aS calls by pulling on didMount and comparing/pushing on that 
+    /**
+     * Validates a Garlicoin (non-testnet) address. Private getter for validateAddress
+     * @private
+     * @param {string} address - The address to validate
+     * @returns {bool} True if address is a valid GRLC address, otherwise false
+     */
+    _checkAddressValidity = address => {
+        return v.validate(address);
+    };
+
+    /**
+     * Adds an address to the AsyncStorage.
+     */
+    submitAddress = async () => {
+        // to-do: possibly reduce aS calls by pulling on didMount and comparing/pushing on that
         const { current: { nickname, address } } = this.state;
 
         let res = await AsyncStorage.getItem("addresses");
 
         let addressList = (await JSON.parse(res)) || [];
         addressList.forEach(a => {
-            if(a.public == address) {
+            if (a.public == address) {
                 this.setState({
                     errors: {
                         duplicate: true
+                    }
+                });
+                return; // to-do: make sure this breaks loop and ends function!
+            }
+            if (!this._checkAddressValidity(address)) {
+                this.setState({
+                    errors: {
+                        invalid: true
                     }
                 });
                 return; // to-do: make sure this breaks loop and ends function!
@@ -74,7 +97,7 @@ export default class ViewAddressList extends Component {
         });
 
         await AsyncStorage.setItem("addresses", JSON.stringify(addressList));
-    }
+    };
 
     render() {
         const { current, dirty, errors, loading } = this.state;
@@ -132,7 +155,7 @@ export default class ViewAddressList extends Component {
                         current.name.length < 1 || current.address.length < 1 || errors.invalid || errors.duplicate
                     }
                     containerViewStyle={{ marginTop: 30 }}
-                    onPress={this._submitAddress}
+                    onPress={this.submitAddress}
                     raised
                     backgroundColor={colours.primary}
                     title={"Submit Address"}

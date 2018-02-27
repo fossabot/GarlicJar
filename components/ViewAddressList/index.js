@@ -110,6 +110,7 @@ export default class ViewAddressList extends Component {
         if (addresses.length < 1) {
             // To-do: handle this with InitiateDatabase (onboardUser) in the future 
             // navigation.navigate("Onboarding");
+            // to-do: add refresh scroller
             return (
                 <View style={coreStyles.root}>
                     <Card>
